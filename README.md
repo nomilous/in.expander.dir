@@ -1,2 +1,2 @@
 # in.expander.dir
-Directory expander for in.fusion
+Directory expander for [in.fusion](https://github.com/nomilous/in.)

@@ -1,0 +1,22 @@
+{
+  "name": "in.expander.dir",
+  "version": "0.0.0",
+  "description": "Directory expander for in.fusion",
+  "main": "lib/expander",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nomilous/in.expander.dir.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nomilous/in.expander.dir/issues"
+  },
+  "homepage": "https://github.com/nomilous/in.expander.dir#readme",
+  "devDependencies": {
+    "when": "^3.7.3"
+  }
+}
