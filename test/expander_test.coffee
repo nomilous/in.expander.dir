@@ -16,11 +16,6 @@ objective 'Expand directory', (should) ->
                 isDirectory: -> false
                 forName: name
 
-        @defer = 
-            resolve: ->
-            reject: ->
-            notify: ->
-
         @In = 
             opts:
                 $$caller:
@@ -80,13 +75,7 @@ objective 'Expand directory', (should) ->
 
         (done, fs, Expander) ->
 
-            trace.filter = true
-
-            @defer.reject = (e) -> console.log e
-
             fs.does readdir: (_, cb) -> cb null, ['was.js', 'dir1', 'dir2']
-
-            @defer.resolve = (r) -> console.log r:r
 
             Expander.perform @In, './there/*'
             .then (r) ->
