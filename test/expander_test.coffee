@@ -1,7 +1,5 @@
 objective 'Expand directory', (should) ->
 
-    trace.filter = true
-
     beforeEach (fs) ->
 
         global.$$in =
@@ -28,8 +26,6 @@ objective 'Expand directory', (should) ->
     it 'reads the directory',
 
         (done, fs, Expander) ->
-
-            trace.filter = true
 
             fs.does readdir: (dir) ->
 
