@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+rm -fr ./words
+mkdir words
+for word in `cat .words | grep -v \' | grep -v ^[A-Z]`
+do
+    first_letter=${word:0:1}
+    first_three_letters=${word:0:3}
+    mkdir -p words/$first_letter/$first_three_letters
+    touch words/$first_letter/$first_three_letters/$word
+done
