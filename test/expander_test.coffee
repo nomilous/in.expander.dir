@@ -36,25 +36,25 @@ objective 'Expand directory', (should) ->
 
                 fs.stub readdir: (dir, cb) ->
 
-                    if dir == '/once/upon/a/time/there'     then return cb null, ['file1', 'was', 'is']
-                    if dir == '/once/upon/a/time/there/was' then return cb null, ['file2', 'dir1', 'dir2']
-                    if dir == '/once/upon/a/time/there/is'  then return cb null, ['file3', 'dir3', 'dir4']
+                    if dir == '/once/upon/a/time/there'     then return cb null, ['file1', 'waS', 'iS']
+                    if dir == '/once/upon/a/time/there/waS' then return cb null, ['file2', 'dir1', 'dir2']
+                    if dir == '/once/upon/a/time/there/iS'  then return cb null, ['file3', 'dir3', 'dir4']
 
                     throw new Error 'Gone too far!'
 
                 @includeDirs = true
                 @includeFiles = true
 
-                Expander.perform @In, './there/*s/*i*', @includeFiles, @includeDirs
+                Expander.perform @In, './there/*S/*i*', @includeFiles, @includeDirs
 
                 .then (r) ->
                     r.should.eql [
-                        "./there/was/file2"
-                        "./there/was/dir1"
-                        "./there/was/dir2"
-                        "./there/is/file3"
-                        "./there/is/dir3"
-                        "./there/is/dir4"
+                        "./there/waS/file2"
+                        "./there/waS/dir1"
+                        "./there/waS/dir2"
+                        "./there/iS/file3"
+                        "./there/iS/dir3"
+                        "./there/iS/dir4"
                     ]
                     done()
 
