@@ -23,7 +23,7 @@ ex.dir('./*.md')
 `.files()`
 
 ```javascript
-ex .files('./node_modules/**/*')
+ex.files('./node_modules/**/*')
 .then(function(arrayOfFileNames){})
 .catch(function(e){});
 ```
@@ -33,7 +33,7 @@ ex .files('./node_modules/**/*')
 `.dirs()`
 
 ```javascript
-ex .dirs('./node_modules/**/*')
+ex.dirs('./node_modules/**/*')
 .then(function(arrayOfDirNames){})
 .catch(function(e){});
 ```
@@ -43,5 +43,17 @@ ex .dirs('./node_modules/**/*')
 
 ### Basic
 
+```javascript
+require('in.');
+
+$$in(function(
+  filenames // in. {{ $$files('./**/*.json') }}
+){
+  filenames instanceof Array
+});
+```
+
 
 ### Advanced
+
+pending
