@@ -1,4 +1,4 @@
-objective 'it can be used standalone', ->
+xobjective 'it can be used standalone', ->
 
     it 'finds files and directories with dir()',
 
