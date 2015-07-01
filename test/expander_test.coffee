@@ -6,17 +6,10 @@ objective 'Expand directory', (should) ->
 
     beforeEach (fs) ->
 
-        global.$$in =
-
-            promise: require('when').promise
-            sequence: require('when/sequence')
-            InfusionError: Error
-
         @includeFiles = true
         @includeDirs = false
 
         @In = opts: $$caller: FileName: '/once/upon/a/time/file.js'
-
 
         fs.stub stat: (name, callback) -> callback null,
 
@@ -267,7 +260,7 @@ objective 'Expand directory', (should) ->
 
             (done, fs, Expander) ->
 
-                fs.does readdir: (path, cb) -> 
+                fs.does readdir: (path, cb) ->
 
                     path.should.equal '/'
                     cb null, ['file.js', 'dir']

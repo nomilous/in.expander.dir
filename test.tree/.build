@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 rm -fr ./words
 mkdir words
-for word in `cat .words | grep -v \' | grep -v ^[A-Z]`
+for word in `cat .words | grep -v \' | awk '{print tolower($0)}'`
 do
+    # echo $word
     first_letter=${word:0:1}
     first_three_letters=${word:0:3}
     mkdir -p words/$first_letter/$first_three_letters

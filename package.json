@@ -18,5 +18,6 @@
   "homepage": "https://github.com/nomilous/in.expander.dir#readme",
   "devDependencies": {
     "when": "^3.7.3"
-  }
+  },
+  "dependencies": {}
 }
