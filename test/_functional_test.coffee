@@ -15,20 +15,19 @@ objective 'ensure it works on actual directory tree', ->
         @run = (mask) => Expander.perform @In, mask, @files, @dirs
 
 
-    it 'finds with regex (partial side effect)',
+    it.only 'finds the elephant',
 
         (done) ->
 
-            @run '../test.tree/words/*/(a|i)'
+            @timeout 6000
 
-            .then (r) -> 
+            @run '../test.tree/*/e/*/ele*t'
 
-                done r.should.eql [
-                    '../test.tree/words/a/a'
-                    '../test.tree/words/i/i'
-                ]
+            .then (r) ->
 
-            .catch done
+                console.log r
+
+                done()
 
 
     it 'finds all words ending in i',
