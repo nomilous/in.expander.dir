@@ -1,5 +1,9 @@
 objective 'Expand directory', (should) ->
 
+    xcontext 'windows?', -> it 'might already support'
+
+    trace.filter = true
+
     beforeEach (fs) ->
 
         global.$$in =
@@ -8,142 +12,283 @@ objective 'Expand directory', (should) ->
             sequence: require('when/sequence')
             InfusionError: Error
 
+        @includeFiles = true
+        @includeDirs = false
+
+        @In = opts: $$caller: FileName: '/once/upon/a/time/file.js'
+
+
         fs.stub stat: (name, callback) -> callback null,
 
             if name.match /(f|g)(i|y)le/
-                isDirectory: -> false
+                isDirectory: -> false    # be a file, fyle, gile, gyle, le(.anything)
                 forName: name
             else 
-                isDirectory: -> true
+                isDirectory: -> true     # defalt as dir
                 forName: name
 
-        @In = 
-            opts:
-                $$caller:
-                    FileName: '/once/upon/a/time/file.js'
+
+    context 'expander.dir()', ->
+
+        it 'includes files and directories',
+
+            (done, fs, Expander) ->
+
+                fs.stub readdir: (dir, cb) ->
+
+                    if dir == '/once/upon/a/time/there'     then return cb null, ['file1', 'was', 'is']
+                    if dir == '/once/upon/a/time/there/was' then return cb null, ['file2', 'dir1', 'dir2']
+                    if dir == '/once/upon/a/time/there/is'  then return cb null, ['file3', 'dir3', 'dir4']
+
+                    throw new Error 'Gone too far!'
+
+                @includeDirs = true
+                @includeFiles = true
+
+                Expander.perform @In, './there/*s/*i*', @includeFiles, @includeDirs
+
+                .then (r) ->
+                    r.should.eql [
+                        "./there/was/file2"
+                        "./there/was/dir1"
+                        "./there/was/dir2"
+                        "./there/is/file3"
+                        "./there/is/dir3"
+                        "./there/is/dir4"
+                    ]
+                    done()
+
+                .catch done
 
 
-    it 'reads the directory',
+    context 'expander.dirs()', ->
 
-        (done, fs, Expander) ->
+        it 'includes only directories',
 
-            fs.does readdir: (dir) ->
+            (done, fs, Expander) ->
 
-                dir.should.equal '/once/upon/a/time/there'
-                done()
+                fs.stub readdir: (dir, cb) ->
 
-            Expander.perform @In, './there/*'
+                    if dir == '/once/upon/a/time/there'     then return cb null, ['file1', 'was', 'is']
+                    if dir == '/once/upon/a/time/there/was' then return cb null, ['file2', 'dir1', 'dir2']
+                    if dir == '/once/upon/a/time/there/is'  then return cb null, ['file3', 'dir3', 'dir4']
 
-            .catch done
+                    throw new Error 'Gone too far!'
 
+                @includeDirs = true
+                @includeFiles = false
 
-    it 'deals ok with relative paths',
+                Expander.perform @In, './there/*s/*i*', @includeFiles, @includeDirs
 
-        (done, fs, Expander) ->
+                .then (r) ->
+                    r.should.eql [
+                        # "./there/was/file2"
+                        "./there/was/dir1"
+                        "./there/was/dir2"
+                        # "./there/is/file3"
+                        "./there/is/dir3"
+                        "./there/is/dir4"
+                    ]
+                    done()
 
-            fs.does readdir: (dir) ->
-
-                dir.should.equal '/once/upon/a/there'
-                done()
-
-            Expander.perform @In, '../there/*'
-
-            .catch done
-
-
-    it 'handles wildcards everywhere',
-
-        (done, fs, Expander) ->
-
-            fs.does readdir: (dir) ->
-
-                dir.should.equal '/once/upon/a/time/there'
-                done()
-
-            Expander.perform @In, './there/**/was/a*/*'
-
-            .catch done
+                .catch done
 
 
-    it 'rejects on error',
+    context 'expander.files()', ->
 
-        (done, fs, Expander) ->
+        it 'includes only files',
 
-            fs.does readdir: (_, cb) -> cb new Error 'Oh! No!'
+            (done, fs, Expander) ->
 
-            Expander.perform @In, './there/**/was/a*/*'
-            .catch -> done()
+                fs.stub readdir: (dir, cb) ->
 
-    it 'does not allow partial deep wildcards',
+                    if dir == '/once/upon/a/time/there'     then return cb null, ['file1', 'was', 'is']
+                    if dir == '/once/upon/a/time/there/was' then return cb null, ['file2', 'dir1', 'dir2']
+                    if dir == '/once/upon/a/time/there/is'  then return cb null, ['file3', 'dir3', 'dir4']
 
-        (done, fs, Expander) ->
+                    throw new Error 'Gone too far!'
 
-            try
-                Expander.perform @In, './there/**e/*'
-            catch e
-                e.toString().should.match /only accepts/
-                done()
+                @includeDirs = false
+                @includeFiles = true
 
-    it 'does not allow partial deep wildcards',
+                Expander.perform @In, './there/*s/*i*', @includeFiles, @includeDirs
 
-        (done, fs, Expander) ->
+                .then (r) ->
+                    r.should.eql [
+                        "./there/was/file2"
+                        # "./there/was/dir1"
+                        # "./there/was/dir2"
+                        "./there/is/file3"
+                        # "./there/is/dir3"
+                        # "./there/is/dir4"
+                    ]
+                    done()
 
-            try
-                Expander.perform @In, './there/e**/*'
-            catch e
-                e.toString().should.match /only accepts/
-                done()
+                .catch done
 
-    it 'does not allow partial deep wildcards',
+    context 'general', ->
 
-        (done, fs, Expander) ->
+        it 'reads the directory',
 
-            try
-                Expander.perform @In, './there/**'
-            catch e
-                e.toString().should.match /only accepts/
-                done()
+            (done, fs, Expander) ->
 
-    it 'does not allow partial deep wildcards',
+                fs.does readdir: (dir) ->
 
-        (done, fs, Expander) ->
+                    dir.should.equal '/once/upon/a/time/there'
+                    done()
 
-            try
-                Expander.perform @In, '**'
-            catch e
-                e.toString().should.match /only accepts/
-                done()
+                Expander.perform @In, './there/*', @includeFiles, @includeDirs
+
+                .catch done
 
 
-    it 'can start at the beginning',
+        it 'deals ok with relative paths',
 
-        (done, fs, Expander) ->
+            (done, fs, Expander) ->
 
-            fs.does readdir: (dir) ->
+                fs.does readdir: (dir) ->
 
-                dir.should.equal '/once/upon/a/time'
-                done()
+                    dir.should.equal '/once/upon/a/there'
+                    done()
 
-            Expander.perform @In, './*'
-            .catch done
+                Expander.perform @In, '../there/*', @includeFiles, @includeDirs
 
-    it 'can start at the very beginning',
-
-        (done, fs, Expander) ->
-
-            fs.does readdir: (dir) ->
-
-                dir.should.equal '/'
-                done()
-
-            Expander.perform @In, '/*'
-            .catch done
-
-    it 'restores relative filenames'
+                .catch done
 
 
-    xcontext 'windows?'
+        it 'handles wildcards everywhere',
 
+            (done, fs, Expander) ->
+
+                fs.does readdir: (dir) ->
+
+                    dir.should.equal '/once/upon/a/time/there'
+                    done()
+
+                Expander.perform @In, './there/**/was/a*/*', @includeFiles, @includeDirs
+
+                .catch done
+
+
+        it 'rejects on error',
+
+            (done, fs, Expander) ->
+
+                fs.does readdir: (_, cb) -> cb new Error 'Oh! No!'
+
+                Expander.perform @In, './there/**/was/a*/*', @includeFiles, @includeDirs
+                .catch -> done()
+
+        it 'does not allow partial deep wildcards',
+
+            (done, fs, Expander) ->
+
+                try
+                    Expander.perform @In, './there/**e/*', @includeFiles, @includeDirs
+                catch e
+                    e.toString().should.match /only accepts/
+                    done()
+
+        it 'does not allow partial deep wildcards',
+
+            (done, fs, Expander) ->
+
+                try
+                    Expander.perform @In, './there/e**/*', @includeFiles, @includeDirs
+                catch e
+                    e.toString().should.match /only accepts/
+                    done()
+
+        it 'does not allow partial deep wildcards',
+
+            (done, fs, Expander) ->
+
+                try
+                    Expander.perform @In, './there/**', @includeFiles, @includeDirs
+                catch e
+                    e.toString().should.match /only accepts/
+                    done()
+
+        it 'does not allow partial deep wildcards',
+
+            (done, fs, Expander) ->
+
+                try
+                    Expander.perform @In, '**', @includeFiles, @includeDirs
+                catch e
+                    e.toString().should.match /only accepts/
+                    done()
+
+
+        it 'can start at the beginning',
+
+            (done, fs, Expander) ->
+
+                fs.does readdir: (dir) ->
+
+                    dir.should.equal '/once/upon/a/time'
+                    done()
+
+                Expander.perform @In, './*', @includeFiles, @includeDirs
+                .catch done
+
+        it 'can start at the very beginning',
+
+            (done, fs, Expander) ->
+
+                fs.does readdir: (dir) ->
+
+                    dir.should.equal '/'
+                    done()
+
+                Expander.perform @In, '/*', @includeFiles, @includeDirs
+                .catch done
+
+        it 'restores relative filenames',
+
+            (done, fs, Expander) ->
+
+                fs.does readdir: (dir, cb) ->
+
+                    dir.should.match '/'
+                    cb null, ['file']
+
+                Expander.perform @In, '../../../../*', @includeFiles, @includeDirs
+
+                .then (r) -> 
+
+                    r.should.eql ['../../../../file']
+                    done()
+
+                .catch done
+
+
+        it 'goes no deeper than it should',
+
+            (done, fs, Expander) ->
+
+                fs.does readdir: (path, cb) -> 
+
+                    path.should.equal '/'
+                    cb null, ['file.js', 'dir']
+
+                fs.spy readdir: (path, cb) ->
+
+                    throw new Error ('No!') unless path == '/'
+
+                @includeDirs = true
+
+                Expander.perform @In, '/*', @includeFiles, @includeDirs
+
+                .then (r) ->
+
+                    r.should.eql [
+                        '/file.js'
+                        '/dir'
+                    ]
+                    done()
+
+                .catch done
 
 
     context 'using **', ->
@@ -200,7 +345,7 @@ objective 'Expand directory', (should) ->
 
             (done, fs, Expander) ->
 
-                Expander.perform @In, './there/**/*'
+                Expander.perform @In, './there/**/*', @includeFiles, @includeDirs
 
                 .then (r) -> 
 
@@ -224,7 +369,7 @@ objective 'Expand directory', (should) ->
 
             (done, fs, Expander) ->
 
-                Expander.perform @In, './there/**/fi*'
+                Expander.perform @In, './there/**/fi*', @includeFiles, @includeDirs
 
                 .then (r) ->
 
@@ -243,7 +388,7 @@ objective 'Expand directory', (should) ->
 
             (done, fs, Expander) ->
 
-                Expander.perform @In, './there/**/*yl*'
+                Expander.perform @In, './there/**/*yl*', @includeFiles, @includeDirs
 
                 .then (r) ->
 
@@ -262,7 +407,7 @@ objective 'Expand directory', (should) ->
 
             (done, fs, Expander) ->
 
-                Expander.perform @In, './there/**/*.js'
+                Expander.perform @In, './there/**/*.js', @includeFiles, @includeDirs
 
                 .then (r) ->
 
@@ -283,7 +428,7 @@ objective 'Expand directory', (should) ->
 
             (done, fs, Expander) ->
 
-                Expander.perform @In, './there/**/*il*j*'
+                Expander.perform @In, './there/**/*il*j*', @includeFiles, @includeDirs
 
                 .then (r) ->
 
@@ -301,7 +446,7 @@ objective 'Expand directory', (should) ->
 
             (done, fs, Expander) ->
                 
-                Expander.perform @In, './there/**/longer/**/f*'
+                Expander.perform @In, './there/**/longer/**/f*', @includeFiles, @includeDirs
 
                 .then (r) ->
 
@@ -310,9 +455,7 @@ objective 'Expand directory', (should) ->
                 .catch done
 
 
-
-
-    context 'going short', ->
+    context 'using *', ->
 
         beforeEach (fs) ->
 
@@ -322,11 +465,13 @@ objective 'Expand directory', (should) ->
                 cb null, ['file1.js', 'file2.js', 'file3.md', 'fyle4.js', 'was', 'dir.js', 'wasn\'t']
 
 
+
+
         it 'finds files with leading wildcard',
 
             (done, fs, Expander) ->
 
-                Expander.perform @In, './there/*.js'
+                Expander.perform @In, './there/*.js', @includeFiles, @includeDirs
 
                 .then (r) ->
 
@@ -343,7 +488,7 @@ objective 'Expand directory', (should) ->
 
             (done, fs, Expander) ->
 
-                Expander.perform @In, './there/f*'
+                Expander.perform @In, './there/f*', @includeFiles, @includeDirs
 
                 .then (r) ->
 
@@ -362,7 +507,7 @@ objective 'Expand directory', (should) ->
 
             (done, fs, Expander) ->
 
-                Expander.perform @In, './there/*i*1*s'
+                Expander.perform @In, './there/*i*1*s', @includeFiles, @includeDirs
 
                 .then (r) ->
 
@@ -383,7 +528,7 @@ objective 'Expand directory', (should) ->
                     path.should.equal '/once/upon/a/time/there/was'
                     cb null, ['file.js', 'file.jsx', 'dir.js', 'dir2']
 
-                Expander.perform @In, './there/*as/*.js'
+                Expander.perform @In, './there/*as/*.js', @includeFiles, @includeDirs
 
                 .then (r) ->
 
@@ -410,7 +555,7 @@ objective 'Expand directory', (should) ->
                     cb null, ['file2.js', 'dir', 'file3.jsx']
 
 
-                Expander.perform @In, './there/w*/*.js'
+                Expander.perform @In, './there/w*/*.js', @includeFiles, @includeDirs
 
                 .then (r) ->
 
@@ -432,7 +577,7 @@ objective 'Expand directory', (should) ->
                     path.should.equal '/once/upon/a/time/there/wasn\'t'
                     cb null, ['file.js', 'file.jsx', 'dir.js', 'dir2']
 
-                Expander.perform @In, './there/w*s*t/*.js'
+                Expander.perform @In, './there/w*s*t/*.js', @includeFiles, @includeDirs
 
                 .then (r) ->
 
@@ -453,7 +598,7 @@ objective 'Expand directory', (should) ->
                     path.should.equal '/once/upon/a/time/there/wasn\'t'
                     cb null, ['file.js', 'gile.jsx', 'dir.js', 'dir2']
 
-                Expander.perform @In, './there/w*s*t/g*.js*'
+                Expander.perform @In, './there/w*s*t/g*.js*', @includeFiles, @includeDirs
 
                 .then (r) ->
 
@@ -463,22 +608,4 @@ objective 'Expand directory', (should) ->
                     done()
 
                 .catch done
-
-
-        it 'dir'
-
-        it 'dirs'
-
-        it 'files'
-
-              
-                
-
-
-
-
-
-
-
-
 
