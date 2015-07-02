@@ -2,9 +2,9 @@
 
 Directory expander for [in.](https://github.com/nomilous/in.)
 
-`npm install in.expander.dir --save`
-
 ## Using standalone
+
+`npm install in.expander.dir --save`
 
 ```javascript
 var ex = require('in.expander.dir');
@@ -40,6 +40,10 @@ ex.dirs('./node_modules/**/*')
 
 
 ## Using with in.
+
+This expander comes bundled within in.
+
+`npm install in. --save`
 
 ### Basic
 
