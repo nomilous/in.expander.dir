@@ -2,7 +2,7 @@
   "name": "in.expander.dir",
   "version": "0.0.0",
   "description": "Directory expander for in.fusion",
-  "main": "lib/expander",
+  "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

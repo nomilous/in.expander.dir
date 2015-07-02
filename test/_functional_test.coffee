@@ -1,4 +1,4 @@
-objective 'ensure it works on actual directory tree', ->
+xobjective 'ensure it works on actual directory tree', ->
 
     #
     # requires test.tree/  .build
@@ -15,19 +15,22 @@ objective 'ensure it works on actual directory tree', ->
         @run = (mask) => Expander.perform @In, mask, @files, @dirs
 
 
-    it.only 'finds the elephant',
+    it 'finds the elephant and only the elephant',
 
         (done) ->
 
             @timeout 6000
 
-            @run '../test.tree/*/e/*/ele*t'
+            @run '../test.tree/*/e/*/ele*h*t'
 
             .then (r) ->
 
-                console.log r
+                done r.should.eql [
+                    '../test.tree/words/e/ele/elephant'
+                ]
 
-                done()
+            .catch done
+                
 
 
     it 'finds all words ending in i',

@@ -2,9 +2,9 @@ xobjective 'it can be used standalone', ->
 
     it 'finds files and directories with dir()',
 
-        (Expander, done) ->
+        (Index, done) ->
 
-            Expander.dir('../*')
+            Index.dir('../*')
 
             .then (r) ->
 
@@ -20,7 +20,7 @@ xobjective 'it can be used standalone', ->
                     "../objective.coffee"
                     "../objective.coffee.json"
                     "../package.json"
-                    "."   # BUG(ish)  ../thisdir
+                    "../test"   # BUG(ish)  ../thisdir
                     "../test.tree"
                 ]
 
@@ -29,9 +29,9 @@ xobjective 'it can be used standalone', ->
 
     it 'finds only files with files()',
 
-        (Expander, done) ->
+        (Index, done) ->
 
-            Expander.files('../*')
+            Index.files('../*')
 
             .then (r) ->
 
@@ -47,7 +47,7 @@ xobjective 'it can be used standalone', ->
                     "../objective.coffee"
                     "../objective.coffee.json"
                     "../package.json"
-                    # "."   # BUG(ish)  ../thisdir
+                    # "."   
                     # "../test.tree"
                 ]
 
@@ -56,9 +56,9 @@ xobjective 'it can be used standalone', ->
 
     it 'finds only directories with dirs()',
 
-        (Expander, done) ->
+        (Index, done) ->
 
-            Expander.dirs('../*')
+            Index.dirs('../*')
 
             .then (r) ->
 
@@ -74,7 +74,7 @@ xobjective 'it can be used standalone', ->
                     # "../objective.coffee"
                     # "../objective.coffee.json"
                     # "../package.json"
-                    "."   # BUG(ish)  ../thisdir
+                    "../test"
                     "../test.tree"
                 ]
 
