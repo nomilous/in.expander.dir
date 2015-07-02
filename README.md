@@ -41,7 +41,7 @@ ex.dirs('./node_modules/**/*')
 
 ## Using with in.
 
-This expander comes bundled within in.
+This expander comes bundled with `in.`
 
 `npm install in. --save`
 
