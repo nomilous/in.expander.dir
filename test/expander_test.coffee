@@ -6,8 +6,8 @@ objective 'Expand directory', (should) ->
 
     beforeEach (fs) ->
 
-        @includeFiles = true
-        @includeDirs = false
+        @doFiles = true
+        @doDirs = false
 
         @In = opts: $$caller: FileName: '/once/upon/a/time/file.js'
 
@@ -35,10 +35,10 @@ objective 'Expand directory', (should) ->
 
                     throw new Error 'Gone too far!'
 
-                @includeDirs = true
-                @includeFiles = true
+                @doDirs = true
+                @doFiles = true
 
-                Expander.perform @In, './there/*S/*i*', @includeFiles, @includeDirs
+                Expander.perform @In, './there/*S/*i*', @doFiles, @doDirs
 
                 .then (r) ->
                     r.should.eql [
@@ -68,10 +68,10 @@ objective 'Expand directory', (should) ->
 
                     throw new Error 'Gone too far!'
 
-                @includeDirs = true
-                @includeFiles = false
+                @doDirs = true
+                @doFiles = false
 
-                Expander.perform @In, './there/*s/*i*', @includeFiles, @includeDirs
+                Expander.perform @In, './there/*s/*i*', @doFiles, @doDirs
 
                 .then (r) ->
                     r.should.eql [
@@ -101,10 +101,10 @@ objective 'Expand directory', (should) ->
 
                     throw new Error 'Gone too far!'
 
-                @includeDirs = false
-                @includeFiles = true
+                @doDirs = false
+                @doFiles = true
 
-                Expander.perform @In, './there/*s/*i*', @includeFiles, @includeDirs
+                Expander.perform @In, './there/*s/*i*', @doFiles, @doDirs
 
                 .then (r) ->
                     r.should.eql [
@@ -126,14 +126,14 @@ objective 'Expand directory', (should) ->
 
             (done, Expander) ->
 
-                Expander.does recurse: (match, next, jump, Path, parts, depth, found) ->
+                Expander.does recurse: (match, next, jump, Path, parts, depth, exinfo, found) ->
 
                     parts.should.eql ['', '*']
                     depth.should.equal 1   #
                     done()
                     then: ->
 
-                Expander.perform @In, '/*', @includeFiles, @includeDirs
+                Expander.perform @In, '/*', @doFiles, @doDirs
 
                 .catch done
 
@@ -142,13 +142,13 @@ objective 'Expand directory', (should) ->
     
             (done, Expander) ->
 
-                Expander.does recurse: (match, next, jump, Path, parts, depth, found) ->
+                Expander.does recurse: (match, next, jump, Path, parts, depth, exinfo, found) ->
 
                     parts.should.eql ['', 'once', 'upon', 'a', 'time', '*']
                     done()
                     then: ->
 
-                Expander.perform @In, './*', @includeFiles, @includeDirs
+                Expander.perform @In, './*', @doFiles, @doDirs
 
                 .catch done
 
@@ -156,13 +156,13 @@ objective 'Expand directory', (should) ->
     
             (done, Expander) ->
 
-                Expander.does recurse: (match, next, jump, Path, parts, depth, found) ->
+                Expander.does recurse: (match, next, jump, Path, parts, depth, exinfo, found) ->
 
                     parts.should.eql ['', 'once', 'upon', 'a', '*']
                     done()
                     then: ->
 
-                Expander.perform @In, '../*', @includeFiles, @includeDirs
+                Expander.perform @In, '../*', @doFiles, @doDirs
 
                 .catch done
 
@@ -178,7 +178,7 @@ objective 'Expand directory', (should) ->
                     path.should.equal '/var/log'
                     done()
 
-                Expander.recurse null, null, jump = 0, '/', ['', 'var', 'log', '*', '*.log'], depth = 1, ->
+                Expander.recurse null, null, jump = 0, '/', ['', 'var', 'log', '*', '*.log'], depth = 1, exinfo = {}, (->)
 
 
         it 'calls stat for each file/dir',
@@ -205,7 +205,7 @@ objective 'Expand directory', (should) ->
                     cb null, isDirectory: ->
                     done()
 
-                Expander.recurse null, null, jump = 0, '/', ['', 'var', 'log', '*', '*.log'], depth = 1, (->)
+                Expander.recurse null, null, jump = 0, '/', ['', 'var', 'log', '*', '*.log'], depth = 1, exinfo = {count: 0}, (->)
 
                 .catch (e) -> console.log EE: e
 
@@ -229,7 +229,7 @@ objective 'Expand directory', (should) ->
                         return true
                         # console.log fileName
 
-                Expander.recurse null, null, jump = 0, '/', ['', 'var', 'log', '*', '*.log'], depth = 1, (->)
+                Expander.recurse null, null, jump = 0, '/', ['', 'var', 'log', '*', '*.log'], depth = 1, exinfo = {count: 0}, (->)
 
                 done()
 
@@ -320,11 +320,11 @@ objective 'Expand directory', (should) ->
 
                 Expander.does
 
-                    mapper: (match, next, jump, Path, parts, depth, stats, found) ->
+                    exinfo: (match, next, jump, Path, parts, depth, stats, exinfo, found) ->
 
                         (fileName) -> ->
 
-                Expander.recurse null, null, jump = 0, '/', ['', 'var', 'log', '*', '*.log'], depth = 1, (->)
+                Expander.recurse null, null, jump = 0, '/', ['', 'var', 'log', '*', '*.log'], depth = 1, {}, (->)
                 done()
 
 
@@ -336,7 +336,7 @@ objective 'Expand directory', (should) ->
 
                     findings = []
 
-                    mapper = Expander.mapper(
+                    mapper = Expander.exinfo(
                         match = '*.log'
                         next = undefined
                         jump = 0
@@ -347,6 +347,7 @@ objective 'Expand directory', (should) ->
                             {for: 'my.log', isDirectory: -> false}
                             {for: 'dir', isDirectory: -> true}
                         ]
+                        exinfo = count: 0
                         found = (filename, stat) ->
                             findings.push filename
                     )
@@ -361,12 +362,11 @@ objective 'Expand directory', (should) ->
 
             context 'recurses with new path', ->
 
-
                 it 'and depth if next is defined and match IS NOT **',
 
                     (done, Expander) ->
 
-                        mapper = Expander.mapper(
+                        mapper = Expander.exinfo(
                             match = '*'
                             next = 'dir'
                             jump = 0
@@ -377,10 +377,11 @@ objective 'Expand directory', (should) ->
                                 {for: 'my.log', isDirectory: -> false}
                                 {for: 'dir', isDirectory: -> true}
                             ]
+                            exinfo = count: 0
                             found = ->
                         )
 
-                        Expander.does recurse: (match, next, jump, Path, parts, depth, found) ->
+                        Expander.does recurse: (match, next, jump, Path, parts, depth, exinfo, found) ->
 
                             Path.should.equal '/var/log/dir'
                             depth.should.equal 3
@@ -397,7 +398,7 @@ objective 'Expand directory', (should) ->
 
                     (done, Expander) ->
 
-                        mapper = Expander.mapper(
+                        mapper = Expander.exinfo(
                             match = '**'
                             next = 'dir'
                             jump = 0
@@ -408,10 +409,11 @@ objective 'Expand directory', (should) ->
                                 {for: 'my.log', isDirectory: -> false}
                                 {for: 'dir', isDirectory: -> true}
                             ]
+                            exinfo = count: 0
                             found = ->
                         )
 
-                        Expander.does recurse: (match, next, jump, Path, parts, depth, found) ->
+                        Expander.does recurse: (match, next, jump, Path, parts, depth, exinfo, found) ->
 
                             Path.should.equal '/var/log/dir'
                             depth.should.equal 2
@@ -427,7 +429,7 @@ objective 'Expand directory', (should) ->
 
                     (done, Expander) ->
 
-                        mapper = Expander.mapper(
+                        mapper = Expander.exinfo(
                             match = '**'
                             next = 'dir'
                             jump = 1
@@ -438,10 +440,11 @@ objective 'Expand directory', (should) ->
                                 {for: 'my.log', isDirectory: -> false}
                                 {for: 'dir', isDirectory: -> true}
                             ]
+                            exinfo = count: 0
                             found = ->
                         )
 
-                        Expander.does recurse: (match, next, jump, Path, parts, depth, found) ->
+                        Expander.does recurse: (match, next, jump, Path, parts, depth, exinfo, found) ->
 
                             Path.should.equal '/var/log/moo/dir'
                             depth.should.equal 3
@@ -457,7 +460,7 @@ objective 'Expand directory', (should) ->
 
                     (done, Expander) ->
 
-                        mapper = Expander.mapper(
+                        mapper = Expander.exinfo(
                             match = '**'
                             next = 'dir'
                             jump = 1
@@ -468,10 +471,11 @@ objective 'Expand directory', (should) ->
                                 {for: 'my.log', isDirectory: -> false}
                                 {for: 'dirr', isDirectory: -> true}
                             ]
+                            exinfo = count: 0
                             found = ->
                         )
 
-                        Expander.does recurse: (match, next, jump, Path, parts, depth, found) ->
+                        Expander.does recurse: (match, next, jump, Path, parts, depth, exinfo, found) ->
 
                             Path.should.equal '/var/log/moo/dirr'
                             depth.should.equal 2
@@ -494,7 +498,7 @@ objective 'Expand directory', (should) ->
                     dir.should.equal '/once/upon/a/time/there'
                     done()
 
-                Expander.perform @In, './there/*', @includeFiles, @includeDirs
+                Expander.perform @In, './there/*', @doFiles, @doDirs
 
                 .catch done
 
@@ -508,7 +512,7 @@ objective 'Expand directory', (should) ->
                     dir.should.equal '/once/upon/a/there'
                     done()
 
-                Expander.perform @In, '../there/*', @includeFiles, @includeDirs
+                Expander.perform @In, '../there/*', @doFiles, @doDirs
 
                 .catch done
 
@@ -522,7 +526,7 @@ objective 'Expand directory', (should) ->
                     dir.should.equal '/once/upon/a/time/there'
                     done()
 
-                Expander.perform @In, './there/**/was/a*/*', @includeFiles, @includeDirs
+                Expander.perform @In, './there/**/was/a*/*', @doFiles, @doDirs
 
                 .catch done
 
@@ -533,43 +537,43 @@ objective 'Expand directory', (should) ->
 
                 fs.does readdir: (_, cb) -> cb new Error 'Oh! No!'
 
-                Expander.perform @In, './there/**/was/a*/*', @includeFiles, @includeDirs
+                Expander.perform @In, './there/**/was/a*/*', @doFiles, @doDirs
                 .catch -> done()
 
         it 'does not allow partial deep wildcards',
 
             (done, fs, Expander) ->
 
-                Expander.perform @In, './there/**e/*', @includeFiles, @includeDirs
+                Expander.perform @In, './there/**e/*', @doFiles, @doDirs
                 .catch (e) ->
-                    e.toString().should.match /only accepts/
+                    e.toString().should.match /invalid use of/
                     done()
 
         it 'does not allow partial deep wildcards',
 
             (done, fs, Expander) ->
 
-                Expander.perform @In, './there/e**/*', @includeFiles, @includeDirs
+                Expander.perform @In, './there/e**/*', @doFiles, @doDirs
                 .catch (e) ->
-                    e.toString().should.match /only accepts/
+                    e.toString().should.match /invalid use of/
                     done()
 
         it 'does not allow partial deep wildcards',
 
             (done, fs, Expander) ->
 
-                Expander.perform @In, './there/**', @includeFiles, @includeDirs
+                Expander.perform @In, './there/**', @doFiles, @doDirs
                 .catch (e) ->
-                    e.toString().should.match /only accepts/
+                    e.toString().should.match /invalid use of/
                     done()
 
         it 'does not allow partial deep wildcards',
 
             (done, fs, Expander) ->
 
-                Expander.perform @In, '**', @includeFiles, @includeDirs
+                Expander.perform @In, '**', @doFiles, @doDirs
                 .catch (e) ->
-                    e.toString().should.match /only accepts/
+                    e.toString().should.match /invalid use of/
                     done()
 
 
@@ -582,7 +586,7 @@ objective 'Expand directory', (should) ->
                     dir.should.equal '/once/upon/a/time'
                     done()
 
-                Expander.perform @In, './*', @includeFiles, @includeDirs
+                Expander.perform @In, './*', @doFiles, @doDirs
                 .catch done
 
         it 'can start at the very beginning',
@@ -594,7 +598,7 @@ objective 'Expand directory', (should) ->
                     dir.should.equal '/'
                     done()
 
-                Expander.perform @In, '/*', @includeFiles, @includeDirs
+                Expander.perform @In, '/*', @doFiles, @doDirs
                 .catch done
 
         it 'restores relative filenames',
@@ -606,7 +610,7 @@ objective 'Expand directory', (should) ->
                     dir.should.match '/'
                     cb null, ['file']
 
-                Expander.perform @In, '../../../../*', @includeFiles, @includeDirs
+                Expander.perform @In, '../../../../*', @doFiles, @doDirs
 
                 .then (r) -> 
 
@@ -629,9 +633,9 @@ objective 'Expand directory', (should) ->
 
                     throw new Error ('No!') unless path == '/'
 
-                @includeDirs = true
+                @doDirs = true
 
-                Expander.perform @In, '/*', @includeFiles, @includeDirs
+                Expander.perform @In, '/*', @doFiles, @doDirs
 
                 .then (r) ->
 
@@ -698,9 +702,9 @@ objective 'Expand directory', (should) ->
 
             (done, fs, Expander) ->
 
-                Expander.perform @In, './there/**/*.*', @includeFiles, @includeDirs
+                Expander.perform @In, './there/**/*.*', @doFiles, @doDirs
 
-                .then (r) -> 
+                .then (r) ->
 
                     r.should.eql [
                         './there/was/a/file3.coffee'
@@ -722,7 +726,7 @@ objective 'Expand directory', (should) ->
 
             (done, fs, Expander) ->
 
-                Expander.perform @In, './there/**/fi*', @includeFiles, @includeDirs
+                Expander.perform @In, './there/**/fi*', @doFiles, @doDirs
 
                 .then (r) ->
 
@@ -741,7 +745,7 @@ objective 'Expand directory', (should) ->
 
             (done, fs, Expander) ->
 
-                Expander.perform @In, './there/**/*yl*', @includeFiles, @includeDirs
+                Expander.perform @In, './there/**/*yl*', @doFiles, @doDirs
 
                 .then (r) ->
 
@@ -760,7 +764,7 @@ objective 'Expand directory', (should) ->
 
             (done, fs, Expander) ->
 
-                Expander.perform @In, './there/**/*.js', @includeFiles, @includeDirs
+                Expander.perform @In, './there/**/*.js', @doFiles, @doDirs
 
                 .then (r) ->
 
@@ -782,7 +786,7 @@ objective 'Expand directory', (should) ->
 
             (done, fs, Expander) ->
 
-                Expander.perform @In, './there/**/*il*j*', @includeFiles, @includeDirs
+                Expander.perform @In, './there/**/*il*j*', @doFiles, @doDirs
 
                 .then (r) ->
 
@@ -801,7 +805,7 @@ objective 'Expand directory', (should) ->
 
             (done, fs, Expander) ->
                 
-                Expander.perform @In, './there/**/longer/**/f*', @includeFiles, @includeDirs
+                Expander.perform @In, './there/**/longer/**/f*', @doFiles, @doDirs
 
                 .then (r) ->
 
@@ -826,7 +830,7 @@ objective 'Expand directory', (should) ->
 
             (done, fs, Expander) ->
 
-                Expander.perform @In, './there/*.js', @includeFiles, @includeDirs
+                Expander.perform @In, './there/*.js', @doFiles, @doDirs
 
                 .then (r) ->
 
@@ -843,7 +847,7 @@ objective 'Expand directory', (should) ->
 
             (done, fs, Expander) ->
 
-                Expander.perform @In, './there/f*', @includeFiles, @includeDirs
+                Expander.perform @In, './there/f*', @doFiles, @doDirs
 
                 .then (r) ->
 
@@ -862,7 +866,7 @@ objective 'Expand directory', (should) ->
 
             (done, fs, Expander) ->
 
-                Expander.perform @In, './there/*i*1*s', @includeFiles, @includeDirs
+                Expander.perform @In, './there/*i*1*s', @doFiles, @doDirs
 
                 .then (r) ->
 
@@ -883,7 +887,7 @@ objective 'Expand directory', (should) ->
                     path.should.equal '/once/upon/a/time/there/was'
                     cb null, ['file.js', 'file.jsx', 'dir.js', 'dir2']
 
-                Expander.perform @In, './there/*as/*.js', @includeFiles, @includeDirs
+                Expander.perform @In, './there/*as/*.js', @doFiles, @doDirs
 
                 .then (r) ->
 
@@ -910,7 +914,7 @@ objective 'Expand directory', (should) ->
                     cb null, ['file2.js', 'dir', 'file3.jsx']
 
 
-                Expander.perform @In, './there/w*/*.js', @includeFiles, @includeDirs
+                Expander.perform @In, './there/w*/*.js', @doFiles, @doDirs
 
                 .then (r) ->
 
@@ -932,7 +936,7 @@ objective 'Expand directory', (should) ->
                     path.should.equal '/once/upon/a/time/there/wasn\'t'
                     cb null, ['file.js', 'file.jsx', 'dir.js', 'dir2']
 
-                Expander.perform @In, './there/w*s*t/*.js', @includeFiles, @includeDirs
+                Expander.perform @In, './there/w*s*t/*.js', @doFiles, @doDirs
 
                 .then (r) ->
 
@@ -953,7 +957,7 @@ objective 'Expand directory', (should) ->
                     path.should.equal '/once/upon/a/time/there/wasn\'t'
                     cb null, ['file.js', 'gile.jsx', 'dir.js', 'dir2']
 
-                Expander.perform @In, './there/w*s*t/g*.js*', @includeFiles, @includeDirs
+                Expander.perform @In, './there/w*s*t/g*.js*', @doFiles, @doDirs
 
                 .then (r) ->
 

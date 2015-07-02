@@ -19,5 +19,7 @@
   "devDependencies": {
     "when": "^3.7.3"
   },
-  "dependencies": {}
+  "dependencies": {
+    "merge": "^1.2.0"
+  }
 }

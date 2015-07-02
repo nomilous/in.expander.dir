@@ -79,3 +79,19 @@ xobjective 'it can be used standalone', ->
                 ]
 
             .catch done
+
+
+    it 'provides ex info', 
+
+        (Index, done) ->
+
+            Index.files('../node_modules/**/*.*')
+
+            .then (r) ->
+
+                console.log r
+                done()
+
+            .catch done
+
+
