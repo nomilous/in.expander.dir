@@ -20,7 +20,7 @@ ex.dir('./*.md')
 
 ### It can search for only files
 
-`.files()`
+__`.files()`__
 
 ```javascript
 ex.files('./node_modules/**/*')
@@ -30,7 +30,7 @@ ex.files('./node_modules/**/*')
 
 ### It can search for only dirs
 
-`.dirs()`
+__`.dirs()`__
 
 ```javascript
 ex.dirs('./node_modules/**/*')
