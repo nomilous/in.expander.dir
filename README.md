@@ -10,7 +10,7 @@ Directory expander for [in.](https://github.com/nomilous/in.)
 var ex = require('in.expander.dir');
 ```
 
-### It return a promise.
+### It returns a promise.
 
 ```javascript
 ex.dir('./*.md')
