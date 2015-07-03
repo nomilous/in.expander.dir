@@ -1,4 +1,4 @@
-xobjective 'it can be used standalone', ->
+xobjective 'it can be used standalone', (should) ->
 
     it 'finds files and directories with dir()',
 
@@ -89,8 +89,8 @@ xobjective 'it can be used standalone', ->
 
             .then (r) ->
 
-                console.log r
-                done()
+                done should.exist r.ex
+                
 
             .catch done
 

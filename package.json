@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/nomilous/in.expander.dir#readme",
   "devDependencies": {
+    "should": "^7.0.1",
     "when": "^3.7.3"
   },
   "dependencies": {
