@@ -96,7 +96,7 @@ $$in(function(
 });
 ```
 
-Combine fullname and file size
+Combine name and file size
 
 ```javascript
 $$in(function(
