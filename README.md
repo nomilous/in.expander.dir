@@ -102,7 +102,7 @@ Combine name and file size
 $$in(function(
   details // in. {{ name: f.name, size: f.size for f in $$files('*').info }}
 ){
-  console.log(details)
+  details[0] === { name: 'file_name', size: 919 };
 });
 ```
 
