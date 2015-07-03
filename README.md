@@ -68,11 +68,41 @@ require('in.');
 $$in(function(
   filenames // in. {{ $$files('./**/*.json') }}
 ){
-  filenames instanceof Array
+  filenames instanceof Array // of filenames
+});
+```
+
+```javascript
+$$in(function(
+  files // in. {{ $$files('./**/*.json').info }}
+){
+  files instanceof Array // of full file info
 });
 ```
 
 
 ### Advanced
 
-pending
+Files in local directory modified in last 10 seconds
+
+```javascript
+$$in(function(
+  names /* in. {{ $$files('*').info
+                  .filter ({mtime}) -> mtime > Date.now() - 10 * 1000
+                  .map ({value}) -> value
+                }} */
+){
+  console.log(names)
+});
+```
+
+Combine fullname and file size
+
+```javascript
+$$in(function(
+  details // in. {{ name: f.name, size: f.size for f in $$files('*').info }}
+){
+  console.log(details)
+});
+```
+
