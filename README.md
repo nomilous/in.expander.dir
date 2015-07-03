@@ -69,6 +69,7 @@ $$in(function(
   filenames // in. {{ $$files('./**/*.json') }}
 ){
   filenames instanceof Array // of filenames
+  // filenames.info
 });
 ```
 
