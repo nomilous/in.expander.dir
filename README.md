@@ -18,6 +18,23 @@ ex.dir('./*.md')
 .catch(function(e){});
 ```
 
+### It provides extended info
+
+```javascript
+ex.dir('./*.md')
+.then(function(arrayOfNames){
+  arrayOfNames.info.forEach(function(file) {
+    file.value === './README.md'; // the value in arrayOfNames
+    file.fullname === '/ect/etc/.../README.md';
+    file.dir === '/etc/etc/etc'
+    file.uid === 919;
+    file.size === 28856;
+    file.isSymbolicLink() === false;
+    //etc...
+  })
+});
+```
+
 ### It can search for only files
 
 __`.files()`__
@@ -25,7 +42,6 @@ __`.files()`__
 ```javascript
 ex.files('./node_modules/**/*')
 .then(function(arrayOfFileNames){})
-.catch(function(e){});
 ```
 
 ### It can search for only dirs
@@ -35,7 +51,6 @@ __`.dirs()`__
 ```javascript
 ex.dirs('./node_modules/**/*')
 .then(function(arrayOfDirNames){})
-.catch(function(e){});
 ```
 
 

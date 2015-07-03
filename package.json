@@ -1,7 +1,7 @@
 {
   "name": "in.expander.dir",
-  "version": "0.0.0",
-  "description": "Directory expander for in.fusion",
+  "version": "0.0.1",
+  "description": "Directory expander for in.",
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -22,5 +22,11 @@
   },
   "dependencies": {
     "merge": "^1.2.0"
-  }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "keywords": [
+    "in.expander"
+  ]
 }

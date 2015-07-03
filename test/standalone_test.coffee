@@ -18,8 +18,6 @@ xobjective 'it can be used standalone', (should) ->
 
         (Index, done) ->
 
-            @timeout 6000
-
             Index.dir('../test/*', '../lib/*')
 
             .then (r) ->
