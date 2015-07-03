@@ -11,7 +11,7 @@ objective 'Expand directory', (should) ->
 
         @In = opts: $$caller: FileName: '/once/upon/a/time/file.js'
 
-        fs.stub stat: (name, callback) -> callback null,
+        fs.stub lstat: (name, callback) -> callback null,
 
             if name.match /(f|g)(i|y)le/
                 isDirectory: -> false    # be a file, fyle, gile, gyle, le(.anything)
@@ -178,7 +178,7 @@ objective 'Expand directory', (should) ->
                     path.should.equal '/var/log'
                     done()
 
-                Expander.recurse null, null, jump = 0, '/', ['', 'var', 'log', '*', '*.log'], depth = 1, exinfo = {}, (->)
+                Expander.recurse null, null, jump = 0, '/', ['', 'var', 'log', '*', '*.log'], depth = 1, exinfo = m: [], (->)
 
 
         it 'calls stat for each file/dir',
@@ -189,23 +189,27 @@ objective 'Expand directory', (should) ->
 
                     cb null, ['app1', 'app2', 'app3']
 
-                fs.does stat: (path, cb) ->
+                # fs.does readdir: (path, cb) ->
+
+                #     console.log path
+
+                fs.does lstat: (path, cb) ->
 
                     path.should.equal '/var/log/app1'
                     cb null, isDirectory: ->
 
-                fs.does stat: (path, cb) ->
+                fs.does lstat: (path, cb) ->
 
                     path.should.equal '/var/log/app2'
                     cb null, isDirectory: ->
 
-                fs.does stat: (path, cb) ->
+                fs.does lstat: (path, cb) ->
 
                     path.should.equal '/var/log/app3'
                     cb null, isDirectory: ->
                     done()
 
-                Expander.recurse null, null, jump = 0, '/', ['', 'var', 'log', '*', '*.log'], depth = 1, exinfo = {count: 0}, (->)
+                Expander.recurse null, null, jump = 0, '/', ['', 'var', 'log', '*', '*.log'], depth = 1, exinfo = m: [], (->)
 
                 .catch (e) -> console.log EE: e
 
@@ -218,7 +222,7 @@ objective 'Expand directory', (should) ->
 
                     cb null, ['app1', 'app2', 'app3']
 
-                Expander.stub mapper: -> -> ->
+                Expander.stub mapper: -> then: ->
 
                 Expander.does filter: (match, next, jump, Path, parts, depth, stats, keeps) ->
 
@@ -229,7 +233,7 @@ objective 'Expand directory', (should) ->
                         return true
                         # console.log fileName
 
-                Expander.recurse null, null, jump = 0, '/', ['', 'var', 'log', '*', '*.log'], depth = 1, exinfo = {count: 0}, (->)
+                Expander.recurse null, null, jump = 0, '/', ['', 'var', 'log', '*', '*.log'], depth = 1, exinfo = m: [], (->)
 
                 done()
 
@@ -240,25 +244,25 @@ objective 'Expand directory', (should) ->
 
                 (done, Expander) ->
 
-                    filter = Expander.filter match = '*', next = '*', jump = 0, [], []
+                    filter = Expander.filter match = '*', next = '*', jump = 0, [{}], []
                     filter('name').should.equal true
 
-                    filter = Expander.filter match = 'n*', next = '*', jump = 0, [], []
+                    filter = Expander.filter match = 'n*', next = '*', jump = 0, [{}], []
                     filter('name').should.equal true
 
-                    filter = Expander.filter match = 'n*m*', next = '*', jump = 0, [], []
+                    filter = Expander.filter match = 'n*m*', next = '*', jump = 0, [{}], []
                     filter('name').should.equal true
 
-                    filter = Expander.filter match = 'n*e', next = '*', jump = 0, [], []
+                    filter = Expander.filter match = 'n*e', next = '*', jump = 0, [{}], []
                     filter('name').should.equal true
 
-                    filter = Expander.filter match = 'e*', next = '*', jump = 0, [], []
+                    filter = Expander.filter match = 'e*', next = '*', jump = 0, [{}], []
                     filter('name').should.equal false
 
-                    filter = Expander.filter match = '*e', next = '*', jump = 0, [], []
+                    filter = Expander.filter match = '*e', next = '*', jump = 0, [{}], []
                     filter('name').should.equal true
 
-                    filter = Expander.filter match = '*e*', next = '*', jump = 0, [], []
+                    filter = Expander.filter match = '*e*', next = '*', jump = 0, [{}], []
                     filter('name').should.equal false
 
                     done()
@@ -324,7 +328,7 @@ objective 'Expand directory', (should) ->
 
                         (fileName) -> ->
 
-                Expander.recurse null, null, jump = 0, '/', ['', 'var', 'log', '*', '*.log'], depth = 1, {}, (->)
+                Expander.recurse null, null, jump = 0, '/', ['', 'var', 'log', '*', '*.log'], depth = 1, exinfo = m: [], (->)
                 done()
 
 
@@ -347,7 +351,7 @@ objective 'Expand directory', (should) ->
                             {for: 'my.log', isDirectory: -> false}
                             {for: 'dir', isDirectory: -> true}
                         ]
-                        exinfo = count: 0
+                        exinfo = m: []
                         found = (filename, stat) ->
                             findings.push filename
                     )
@@ -377,7 +381,7 @@ objective 'Expand directory', (should) ->
                                 {for: 'my.log', isDirectory: -> false}
                                 {for: 'dir', isDirectory: -> true}
                             ]
-                            exinfo = count: 0
+                            exinfo = m: []
                             found = ->
                         )
 
@@ -387,6 +391,7 @@ objective 'Expand directory', (should) ->
                             depth.should.equal 3
                             jump.should.equal 0
                             done()
+                            then: ->
 
 
                         mapper('my.log')()
@@ -409,7 +414,7 @@ objective 'Expand directory', (should) ->
                                 {for: 'my.log', isDirectory: -> false}
                                 {for: 'dir', isDirectory: -> true}
                             ]
-                            exinfo = count: 0
+                            exinfo = m: []
                             found = ->
                         )
 
@@ -419,6 +424,7 @@ objective 'Expand directory', (should) ->
                             depth.should.equal 2
                             jump.should.equal 1
                             done()
+                            then: ->
 
 
                         mapper('my.log')()
@@ -440,7 +446,7 @@ objective 'Expand directory', (should) ->
                                 {for: 'my.log', isDirectory: -> false}
                                 {for: 'dir', isDirectory: -> true}
                             ]
-                            exinfo = count: 0
+                            exinfo = m: []
                             found = ->
                         )
 
@@ -450,6 +456,7 @@ objective 'Expand directory', (should) ->
                             depth.should.equal 3
                             jump.should.equal 0
                             done()
+                            then: ->
 
 
                         mapper('my.log')()
@@ -471,7 +478,7 @@ objective 'Expand directory', (should) ->
                                 {for: 'my.log', isDirectory: -> false}
                                 {for: 'dirr', isDirectory: -> true}
                             ]
-                            exinfo = count: 0
+                            exinfo = m: []
                             found = ->
                         )
 
@@ -481,6 +488,7 @@ objective 'Expand directory', (should) ->
                             depth.should.equal 2
                             jump.should.equal 2
                             done()
+                            then: ->
 
 
                         mapper('my.log')()

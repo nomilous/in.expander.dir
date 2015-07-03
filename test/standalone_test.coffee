@@ -1,5 +1,40 @@
 xobjective 'it can be used standalone', (should) ->
 
+    xit 'keeps going on no access but notifies',
+
+        (Index, done) ->
+
+            @timeout 6000
+
+            Index.dir('/**/*').then(
+                (r) ->
+                    console.log r
+                done
+                (notify) -> console.log notify.error
+            )
+
+
+    it 'can find with multiple masks',
+
+        (Index, done) ->
+
+            @timeout 6000
+
+            Index.dir('../test/*', '../lib/*')
+
+            .then (r) ->
+
+                done r.should.eql [
+                    '_functional_test.coffee'
+                    'expander_test.coffee'
+                    'standalone_test.coffee'
+                    '../lib/expander.js'
+                    '../lib/index.js'
+                ]
+
+            .catch done
+
+
     it 'finds files and directories with dir()',
 
         (Index, done) ->
