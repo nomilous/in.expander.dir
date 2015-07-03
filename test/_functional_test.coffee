@@ -1,4 +1,4 @@
-xobjective 'ensure it works on actual directory tree', ->
+objective 'ensure it works on actual directory tree', ->
 
     #
     # requires test.tree/  .build
@@ -13,6 +13,18 @@ xobjective 'ensure it works on actual directory tree', ->
         @dirs = true
 
         @run = (mask) => Expander.perform @In, mask, @files, @dirs
+
+
+
+    it.only 'actual', (done) ->
+
+        @run '~/Desktop/**/*.*'
+
+        .then (r) ->
+
+            console.log '\n', e.name, '\n', e.m for e in r.ex
+
+        .catch done
 
 
     it 'finds the elephant and only the elephant',
