@@ -107,3 +107,12 @@ $$in(function(
 });
 ```
 
+### And finally
+
+```javascript
+$$in(function(movies) { // in. {{ $$files('~/Desktop/**/*.avi').info }}
+  movies[4].m[0] === 'Her';
+  movies[4].m[1] === 'untitled folder/stuff/untitled folder/movies/from clive/';
+});
+```
+
