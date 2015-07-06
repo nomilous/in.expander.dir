@@ -2,8 +2,6 @@
 
 Directory expander for [in.](https://github.com/nomilous/in.)
 
-This expander is bundled with in.
-
 ## Using standalone
 
 `npm install in.expander.dir --save`
