@@ -26,9 +26,9 @@ xobjective 'ensure it works on actual directory tree', ->
 
             .then (r) ->
 
-                r.ex[0].name.should.equal 'elephant'
-                r.ex[0].stat.size.should.equal 0
-                r.ex[0].m.should.eql [ 'words', 'ele', 'p', 'an' ]
+                r.info[0].name.should.equal 'elephant'
+                r.info[0].size.should.equal 0
+                r.info[0].m.should.eql [ 'an', 'p', 'ele', 'words' ]
 
                 done r.should.eql [
                     '../test.tree/words/e/ele/elephant'

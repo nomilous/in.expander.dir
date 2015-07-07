@@ -1,4 +1,4 @@
-xobjective 'it can be used standalone', (should) ->
+objective 'it can be used standalone', (should) ->
 
     xit 'keeps going on no access but notifies',
 
@@ -122,7 +122,7 @@ xobjective 'it can be used standalone', (should) ->
 
             .then (r) ->
 
-                done should.exist r.ex
+                done should.exist r.info
                 
 
             .catch done
