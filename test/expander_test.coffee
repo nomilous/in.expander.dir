@@ -11,14 +11,16 @@ objective 'Expand directory', (should) ->
 
         @In = opts: $$caller: FileName: '/once/upon/a/time/file.js'
 
-        fs.stub lstat: (name, callback) -> callback null,
+        fs.stub lstat: (name, callback) ->
 
-            if name.match /(f|g)(i|y)le/
-                isDirectory: -> false    # be a file, fyle, gile, gyle, le(.anything)
-                forName: name
-            else 
-                isDirectory: -> true     # defalt as dir
-                forName: name
+            callback null,
+
+                if name.match /(f|g)(i|y)le/
+                    isDirectory: -> false    # be a file, fyle, gile, gyle, le(.anything)
+                    forName: name
+                else 
+                    isDirectory: -> true     # defalt as dir
+                    forName: name
 
 
     context 'expander.dir()', ->
@@ -222,7 +224,7 @@ objective 'Expand directory', (should) ->
 
                     cb null, ['app1', 'app2', 'app3']
 
-                Expander.stub mapper: -> then: ->
+                Expander.stub mapper: -> then: -> done()
 
                 Expander.does filter: (match, next, jump, Path, parts, depth, stats, keeps) ->
 
@@ -230,12 +232,14 @@ objective 'Expand directory', (should) ->
 
                     (fileName) -> 
 
+
                         return true
+
                         # console.log fileName
 
                 Expander.recurse null, null, jump = 0, '/', ['', 'var', 'log', '*', '*.log'], depth = 1, exinfo = m: [], (->)
 
-                done()
+                
 
 
         context 'filter()', ->
@@ -326,10 +330,11 @@ objective 'Expand directory', (should) ->
 
                     exinfo: (match, next, jump, Path, parts, depth, stats, exinfo, found) ->
 
-                        (fileName) -> ->
+                        (fileName) -> -> 
 
                 Expander.recurse null, null, jump = 0, '/', ['', 'var', 'log', '*', '*.log'], depth = 1, exinfo = m: [], (->)
-                done()
+                .then -> done()
+                .catch done
 
 
         context 'mapper()', ->
