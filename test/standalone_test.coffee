@@ -68,6 +68,10 @@ objective 'it can be used standalone', (should) ->
 
             .then (r) ->
 
+                # .git is sometimes a file and sometimes a directory
+
+                r.shift() if r[0] == '../.git'
+
                 done r.should.eql [
 
                     # "../.git"
@@ -95,9 +99,11 @@ objective 'it can be used standalone', (should) ->
 
             .then (r) ->
 
+                r.shift() if r[0] == '../.git'
+
                 done r.should.eql [
 
-                    "../.git"
+                    # "../.git"
                     # "../.gitignore"
                     # "../.npmignore"
                     # "../LICENSE"
