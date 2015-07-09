@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/nomilous/in.expander.dir.svg?branch=master)](https://travis-ci.org/nomilous/in.expander.dir)
+
 # in.expander.dir
 
 Directory expander for [in.](https://github.com/nomilous/in.)
