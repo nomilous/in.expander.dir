@@ -1,6 +1,6 @@
 {
   "name": "in.expander.dir",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Directory expander for in.",
   "main": "lib/index.js",
   "scripts": {
